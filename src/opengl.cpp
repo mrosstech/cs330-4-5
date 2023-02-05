@@ -187,10 +187,11 @@ int main () {
     // uses custom include to make creating new shaders easier.
     Shader myShader("../shaders/default.vs", "../shaders/default.fs");
 
-    Cylinder cylinder(0.0f, 0.0f, 0.0f, 5.0f, 2.0f, 0, 0, 255, 20);
-    Cube cube(0.0f, 0.0f, 0.0f, 4.0f, 255, 0, 0);
-    Cone cone(0.0f, 0.0f, 0.0f, 5.0f, 2.0f, 0, 0, 255, 20);
-    Plane plane(0.0f, 0.0f, 0.0f, 10.0f, 0, 255, 0);
+    Cylinder cylinder(1.0f, 1.0f, 0.0f, 1.0f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
+    //Cube cube(0.0f, 0.0f, 0.0f, 4.0f, 5.0f, 4.0f, 255, 0, 0);
+    Cone cone(1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
+    Plane plane(0.0f, 0.0f, 0.0f, 6.0f, 4.0f, 139/255.f, 69/255.f, 19/255.f);
+    //Sphere sphere(0.0f, 0.0f, 0.0f, 4.0f, 255, 0, 0, 20, 20);
     while(!glfwWindowShouldClose(window))
     {
 
@@ -212,11 +213,13 @@ int main () {
             myShader.setMatrix4fv("projection", ortho);
         }
         myShader.use();
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        cube.draw();
+        //cube.draw();
+        cone.draw();
         cylinder.draw();
         plane.draw();
+        //sphere.draw();
         //myShape.render();
         glfwPollEvents();    
         glfwSwapBuffers(window);
