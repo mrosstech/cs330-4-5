@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cmath>
 #include "shader.h"
+#include "shapes.h"
 
 using namespace std;
 
@@ -15,7 +16,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 // Initialize Camera
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // Camera is 3 units 'above' the scene
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);  // Camera is initially looking at the origin.
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -12.0f);  // Camera is initially looking at the origin.
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // Camera up is set as the 'y' axis
 
 // timing
@@ -34,6 +35,10 @@ bool firstMouse = true;
 
 float lastScrollX = 0, lastScrollY = 0;
 float scrollSensitivity = 0.001;
+
+
+// Start in perspective mode
+bool usePerspective = true;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -102,6 +107,8 @@ void processInput(GLFWwindow *window)
         cameraPos += cameraSpeed * cameraUp;
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
         cameraPos -= cameraSpeed * cameraUp;
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+        usePerspective = !usePerspective;
 }
 
 
@@ -159,87 +166,31 @@ int main () {
 
     glEnable(GL_DEPTH_TEST); 
 
+    // Create the model matrix:
+    glm::mat4 model = glm::mat4(1.0f);
+    //model = glm::rotate(model, glm::radians(20.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    //model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    // Create the view matrix:
+    glm::mat4 view = glm::mat4(1.0f);
+    //view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f)); 
+
+    // Create the projection matrix
+    glm::mat4 perspective = glm::mat4(1.0f);
+    perspective = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+    glm::mat4 ortho = glm::mat4(1.0f);
+    ortho = glm::ortho(-5.0f, 5.0f, 5.0f, -5.0f, -30.0f, 10.0f);
+
+
     // Build and compile shaders
     // uses custom include to make creating new shaders easier.
     Shader myShader("../shaders/default.vs", "../shaders/default.fs");
 
-    // Setup vertex data and configure vertex attributes
-    float triangleVertices1[] = {
-        -0.5f, 0.0f, 0.0f, 1.0f, 0.8f, 0.9f,    // a
-        0.0f, 1.0f, -0.5f, 1.0f, 1.0f, 1.0f,    // b
-        0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,     // c
-        0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,    // d
-        -0.5f, 0.0f, -1.0f, 0.0f, 0.5f, 0.5f   // e
-    };
-    unsigned int indices[] = {
-        0, 1, 2,
-        2, 1, 3,
-        3, 1, 4,
-        4, 1, 0,
-        0, 2, 3,
-        0, 4, 3
-    };
-    /*
-    A = -0.5f, 0.0f, 0.0f, 1.0f, 0.8f, 0.9f,
-    B = 0.0f, 1.0f, -0.5f, 1.0f, 1.0f, 1.0f,
-    C = 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-    D = 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-    E = -0.5f, 0.0f, -1.0f, 0.0f, 0.5f, 0.5f,
-
-    a, b, c
-    c, b, d
-    d, b, e
-    e, b, a
-    */
-
-    // Create the model matrix:
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(20.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-    // Create the view matrix:
-    glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); 
-
-    // Create the projection matrix
-    glm::mat4 projection = glm::mat4(1.0f);
-    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-
-
-    // Initialize the vertex buffer objects
-    unsigned int VBO, VAO, EBO;
-
-    // Generate one vertex array
-    glGenVertexArrays(1, &VAO);
-
-    // Generate one vertex and element buffers
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    // Bind the VBO buffer to the GL_ARRAY_BUFFER buffer object
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    // **Bind the EBO buffer to ELEMENT_ARRAY_BUFFER object
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
-    // Add the triangle vertices to the buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices1), triangleVertices1, GL_STATIC_DRAW);
-
-    // **Add the index data to the buffer
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // Describe where to find the vertex attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); // position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float))); // color
-    glEnableVertexAttribArray(1);
-
-
-
-    // glUseProgram(shaderProgram);
-
+    Cylinder cylinder(0.0f, 0.0f, 0.0f, 5.0f, 2.0f, 0, 0, 255, 20);
+    Cube cube(0.0f, 0.0f, 0.0f, 4.0f, 255, 0, 0);
+    Cone cone(0.0f, 0.0f, 0.0f, 5.0f, 2.0f, 0, 0, 255, 20);
+    Plane plane(0.0f, 0.0f, 0.0f, 10.0f, 0, 255, 0);
     while(!glfwWindowShouldClose(window))
     {
 
@@ -255,12 +206,18 @@ int main () {
 
         myShader.setMatrix4fv("model", model);
         myShader.setMatrix4fv("view", view);
-        myShader.setMatrix4fv("projection", projection);
+        if (usePerspective) {
+            myShader.setMatrix4fv("projection", perspective);
+        } else {
+            myShader.setMatrix4fv("projection", ortho);
+        }
         myShader.use();
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glBindVertexArray(VAO);
-        // glDrawArrays(GL_TRIANGLES, 0, 12);
-        glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        cube.draw();
+        cylinder.draw();
+        plane.draw();
+        //myShape.render();
         glfwPollEvents();    
         glfwSwapBuffers(window);
     }
