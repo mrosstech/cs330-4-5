@@ -1,6 +1,8 @@
 #ifndef SHAPES_H
 #define SHAPES_H
+#define _USE_MATH_DEFINES
 
+#include <cmath>
 #include <glad/glad.h> // include glad to get all the required OpenGL headers
 
 #include <string>
@@ -8,6 +10,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <math.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
