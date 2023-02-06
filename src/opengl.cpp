@@ -1,3 +1,4 @@
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -132,7 +133,6 @@ int main () {
 
     
 
-
 /*
 
     Create GLFW Window
@@ -164,6 +164,19 @@ int main () {
         return -1;
     }    
 
+
+    // Set texture repetition parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+    // Set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);   
+
+    // Set mipmap modes
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     glEnable(GL_DEPTH_TEST); 
 
     // Create the model matrix:
@@ -189,8 +202,8 @@ int main () {
 
     Cylinder cylinder(1.0f, 1.0f, 0.0f, 1.0f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
     //Cube cube(0.0f, 0.0f, 0.0f, 4.0f, 5.0f, 4.0f, 255, 0, 0);
-    Cone cone(1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
-    Plane plane(0.0f, 0.0f, 0.0f, 6.0f, 4.0f, 139/255.f, 69/255.f, 19/255.f);
+    //Cone cone(1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
+    //Plane plane(0.0f, 0.0f, 0.0f, 6.0f, 4.0f, 139/255.f, 69/255.f, 19/255.f);
     //Sphere sphere(0.0f, 0.0f, 0.0f, 4.0f, 255, 0, 0, 20, 20);
     while(!glfwWindowShouldClose(window))
     {
@@ -213,12 +226,12 @@ int main () {
             myShader.setMatrix4fv("projection", ortho);
         }
         myShader.use();
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         //cube.draw();
-        cone.draw();
+        //cone.draw();
         cylinder.draw();
-        plane.draw();
+        //plane.draw();
         //sphere.draw();
         //myShape.render();
         glfwPollEvents();    
