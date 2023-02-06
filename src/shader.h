@@ -1,5 +1,6 @@
 #ifndef SHADER_H
 #define SHADER_H
+#define _USE_MATH_DEFINES
 
 #include <glad/glad.h> // include glad to get all the required OpenGL headers
 
