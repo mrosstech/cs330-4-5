@@ -1,6 +1,6 @@
 #ifndef SHAPES_H
 #define SHAPES_H
-#define _USE_MATH_DEFINES
+#define STB_IMAGE_IMPLEMENTATION
 
 #include <cmath>
 #include <glad/glad.h> // include glad to get all the required OpenGL headers
@@ -10,11 +10,13 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
-#include <math.h>
+#include <filesystem>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "stb_image.h"
+
 
 class Cylinder
 {
@@ -31,12 +33,17 @@ class Cylinder
 
         // Initialize the OpenGL constructs for this cylinder
         void init();
+
+        // Load the texture
+        void loadTexture();
+
     private:
         std::vector<float> vertices;
         std::vector<int> indices;
         int vertexSize;
         int indexSize;
-        unsigned int VBOc, VAOc, EBOc;
+        unsigned int VBOc, VAOc, EBOc, texture1, texture2;
+        std::string texturePath = "./resources/textures/wall.jpg";
 };
 
 Cylinder::Cylinder(float x, float y, float z, float height, float radius, float colorR, float colorG, float colorB, int numSlices) {
@@ -48,9 +55,13 @@ void Cylinder::init() {
     // Generate one vertex array
     glGenVertexArrays(1, &VAOc);
 
-    // Generate one vertex and element buffers
+    // Generate one vertex, texture and element buffer
     glGenBuffers(1, &VBOc);
     glGenBuffers(1, &EBOc);
+    glGenTextures(1, &texture1);
+
+    // Bind the texture
+    glBindTexture(GL_TEXTURE_2D, texture1); 
 
     glBindVertexArray(VAOc);
 
@@ -67,10 +78,12 @@ void Cylinder::init() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
 
     // Describe where to find the vertex attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); // position
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float))); // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float))); // color
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float))); // texture
+    glEnableVertexAttribArray(2);
 
 }
 void Cylinder::generateVertices(float x, float y, float z, float height, float radius, float colorR, float colorG, float colorB, int numSlices) {
@@ -84,6 +97,8 @@ void Cylinder::generateVertices(float x, float y, float z, float height, float r
         vertices.push_back(colorR);
         vertices.push_back(colorG);
         vertices.push_back(colorB);
+        vertices.push_back(0.5f);
+        vertices.push_back(1.0f);
 
         vertices.push_back(x + radius*cos(theta));          // Outside current top - 1
         vertices.push_back(y + radius*sin(theta));
@@ -91,6 +106,8 @@ void Cylinder::generateVertices(float x, float y, float z, float height, float r
         vertices.push_back(colorR);
         vertices.push_back(colorG);
         vertices.push_back(colorB);
+        vertices.push_back((1.0f / numSlices) * i);
+        vertices.push_back(1.0f);
 
         vertices.push_back(x + radius*cos(nextTheta));      // Outside next top
         vertices.push_back(y + radius*sin(nextTheta));
@@ -98,6 +115,8 @@ void Cylinder::generateVertices(float x, float y, float z, float height, float r
         vertices.push_back(colorR);
         vertices.push_back(colorG);
         vertices.push_back(colorB);
+        vertices.push_back((1.0f / numSlices) * (i + 1));
+        vertices.push_back(1.0f);
 
         vertices.push_back(x + radius*cos(nextTheta));      // Outside next bottom
         vertices.push_back(y + radius*sin(nextTheta));
@@ -105,6 +124,9 @@ void Cylinder::generateVertices(float x, float y, float z, float height, float r
         vertices.push_back(colorR);
         vertices.push_back(colorG);
         vertices.push_back(colorB);
+        vertices.push_back((1.0f / numSlices) * (i + 1));
+        vertices.push_back(0.0f);
+
 
         vertices.push_back(x + radius*cos(theta));          // Outside current bottom
         vertices.push_back(y + radius*sin(theta));
@@ -112,6 +134,9 @@ void Cylinder::generateVertices(float x, float y, float z, float height, float r
         vertices.push_back(colorR);
         vertices.push_back(colorG);
         vertices.push_back(colorB);
+        vertices.push_back((1.0f / numSlices) * (i));
+        vertices.push_back(0.0f);
+
 
         vertices.push_back(x);                          // Center bottom
         vertices.push_back(y);
@@ -119,6 +144,8 @@ void Cylinder::generateVertices(float x, float y, float z, float height, float r
         vertices.push_back(colorR);
         vertices.push_back(colorG);
         vertices.push_back(colorB);
+        vertices.push_back(0.5f);
+        vertices.push_back(1.0f);
 
 
         indices.push_back(0 + i * 6);  // Top Triangle
@@ -143,6 +170,23 @@ void Cylinder::generateVertices(float x, float y, float z, float height, float r
 void Cylinder::draw() {
     glBindVertexArray(VAOc);
     glDrawElements(GL_TRIANGLES, indexSize, GL_UNSIGNED_INT, 0);
+}
+
+void Cylinder::loadTexture() {
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+    unsigned char *data = stbi_load((texturePath).c_str(), &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
 }
 
 
