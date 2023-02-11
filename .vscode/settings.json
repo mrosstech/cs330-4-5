@@ -21,6 +21,7 @@
         "filesystem": "cpp",
         "list": "cpp",
         "format": "cpp",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "xlocale": "cpp"
     }
 }

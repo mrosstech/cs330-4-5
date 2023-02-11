@@ -16,8 +16,8 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // Initialize Camera
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f); // Camera is 3 units 'above' the scene
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -12.0f);  // Camera is initially looking at the origin.
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 10.0f); // Camera is 3 units 'above' the scene
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);  // Camera is initially looking at the origin.
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // Camera up is set as the 'y' axis
 
 // timing
@@ -45,6 +45,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }  
+
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (firstMouse) // initially set to true
@@ -111,6 +112,24 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
         usePerspective = !usePerspective;
 }
+
+void loadTexture(std::string texturePath) {
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+    unsigned char *data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+}
+
 
 
 int main () {
@@ -181,12 +200,12 @@ int main () {
 
     // Create the model matrix:
     glm::mat4 model = glm::mat4(1.0f);
-    //model = glm::rotate(model, glm::radians(20.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     //model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
     // Create the view matrix:
     glm::mat4 view = glm::mat4(1.0f);
-    //view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f)); 
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.0f)); 
 
     // Create the projection matrix
     glm::mat4 perspective = glm::mat4(1.0f);
@@ -195,15 +214,65 @@ int main () {
     glm::mat4 ortho = glm::mat4(1.0f);
     ortho = glm::ortho(-5.0f, 5.0f, 5.0f, -5.0f, -30.0f, 10.0f);
 
+    // Load Textures
+    unsigned int planks, iron, wax, woodgrain;
+    glGenTextures(1, &planks);
+    glGenTextures(1, &iron);
+    glGenTextures(1, &wax);
+    glGenTextures(1, &woodgrain);
+   
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, planks);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    loadTexture(".\\resources\\textures\\wood.jpg");
+    
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, iron);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load and generate the texture
+    loadTexture(".\\resources\\textures\\iron.jpg");
+
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, wax);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load and generate the texture
+    loadTexture(".\\resources\\textures\\wax.jpg");
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, woodgrain);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load and generate the texture
+    loadTexture(".\\resources\\textures\\woodgrain.jpg");
 
     // Build and compile shaders
     // uses custom include to make creating new shaders easier.
     Shader myShader("../shaders/default.vs", "../shaders/default.fs");
-    myShader.setInt("texture1", 0);
-    //Cylinder cylinder(1.0f, 1.0f, 0.0f, 1.0f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
+    myShader.use();
+    
+
+    Cylinder helmet_bottom(1.0f, 1.0f, 0.0f, 1.0f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
     //Cube cube(0.0f, 0.0f, 0.0f, 4.0f, 5.0f, 4.0f, 255, 0, 0);
-    Cone cone(1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 4);
-    //Plane plane(0.0f, 0.0f, 0.0f, 6.0f, 4.0f, 139/255.f, 69/255.f, 19/255.f);
+    Cone helmet_top(1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
+    Plane table(0.0f, 0.0f, 0.0f, 6.0f, 4.0f, 139/255.f, 69/255.f, 19/255.f);
+    Cylinder candle_bottom(1.6f, 1.0f, 0.0f, 0.5f, 0.2f, 112/255.f, 124/255.f, 130/255.f, 20);
+    Cylinder candle_top(1.6f, 1.0f, 0.5f, 0.05f, 0.15f, 112/255.f, 124/255.f, 130/255.f, 20);
     //Sphere sphere(0.0f, 0.0f, 0.0f, 4.0f, 255, 0, 0, 20, 20);
     while(!glfwWindowShouldClose(window))
     {
@@ -225,13 +294,19 @@ int main () {
         } else {
             myShader.setMatrix4fv("projection", ortho);
         }
-        myShader.use();
+        
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         //cube.draw();
-        cone.draw();
-        //cylinder.draw();
-        //plane.draw();
+        myShader.setInt("texture1", 1);
+        helmet_top.draw();
+        helmet_bottom.draw();
+        myShader.setInt("texture1", 0);
+        table.draw();
+        myShader.setInt("texture1", 3);
+        candle_bottom.draw();
+        myShader.setInt("texture1", 2);
+        candle_top.draw();
         //sphere.draw();
         //myShape.render();
         glfwPollEvents();    

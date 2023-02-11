@@ -34,16 +34,13 @@ class Cylinder
         // Initialize the OpenGL constructs for this cylinder
         void init();
 
-        // Load the texture
-        void loadTexture();
 
     private:
         std::vector<float> vertices;
         std::vector<int> indices;
         int vertexSize;
         int indexSize;
-        unsigned int VBOc, VAOc, EBOc, texture1, texture2;
-        std::string texturePath = ".\\resources\\textures\\wall.jpg";
+        unsigned int VBOc, VAOc, EBOc;
 };
 
 Cylinder::Cylinder(float x, float y, float z, float height, float radius, float colorR, float colorG, float colorB, int numSlices) {
@@ -58,11 +55,8 @@ void Cylinder::init() {
     // Generate one vertex, texture and element buffer
     glGenBuffers(1, &VBOc);
     glGenBuffers(1, &EBOc);
-    glGenTextures(1, &texture1);
 
     // Bind the texture
-    glBindTexture(GL_TEXTURE_2D, texture1); 
-    loadTexture();
     glBindVertexArray(VAOc);
 
     // Bind the VBO buffer to the GL_ARRAY_BUFFER buffer object
@@ -170,23 +164,6 @@ void Cylinder::generateVertices(float x, float y, float z, float height, float r
 void Cylinder::draw() {
     glBindVertexArray(VAOc);
     glDrawElements(GL_TRIANGLES, indexSize, GL_UNSIGNED_INT, 0);
-}
-
-void Cylinder::loadTexture() {
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-    unsigned char *data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
 }
 
 
@@ -337,14 +314,12 @@ class Cone
         // Initialize the OpenGL constructs for this cylinder
         void init();
 
-        void loadTexture();
     private:
         std::vector<float> vertices;
         std::vector<int> indices;
         int vertexSize;
         int indexSize;
-        unsigned int VBOc, VAOc, EBOc, texture1, texture2;
-        std::string texturePath = ".\\resources\\textures\\wall.jpg";
+        unsigned int VBOc, VAOc, EBOc;
 };
 
 Cone::Cone(float x, float y, float z, float height, float radius, float colorR, float colorG, float colorB, int numSlices) {
@@ -359,11 +334,8 @@ void Cone::init() {
     // Generate one vertex, texture and element buffer
     glGenBuffers(1, &VBOc);
     glGenBuffers(1, &EBOc);
-    glGenTextures(1, &texture1);
 
     // Bind the texture
-    glBindTexture(GL_TEXTURE_2D, texture1); 
-    loadTexture();
     glBindVertexArray(VAOc);
 
     // Bind the VBO buffer to the GL_ARRAY_BUFFER buffer object
@@ -447,23 +419,6 @@ void Cone::draw() {
     glDrawElements(GL_TRIANGLES, indexSize, GL_UNSIGNED_INT, 0);
 }
 
-void Cone::loadTexture() {
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-    unsigned char *data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-}
-
 
 class Plane
 {
@@ -480,6 +435,8 @@ class Plane
 
         // Initialize the OpenGL constructs for this plane
         void init();
+
+        void loadTexture();
     private:
         std::vector<float> vertices;
         std::vector<int> indices;
@@ -497,10 +454,11 @@ void Plane::init() {
     // Generate one vertex array
     glGenVertexArrays(1, &VAOc);
 
-    // Generate one vertex and element buffers
+    // Generate one vertex, texture and element buffer
     glGenBuffers(1, &VBOc);
     glGenBuffers(1, &EBOc);
 
+    // Bind the texture
     glBindVertexArray(VAOc);
 
     // Bind the VBO buffer to the GL_ARRAY_BUFFER buffer object
@@ -516,10 +474,12 @@ void Plane::init() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
 
     // Describe where to find the vertex attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); // position
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float))); // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float))); // color
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float))); // texture
+    glEnableVertexAttribArray(2);
 
 }
 void Plane::generateVertices(float x, float y, float z, float width, float length, float colorR, float colorG, float colorB) {
@@ -530,6 +490,9 @@ void Plane::generateVertices(float x, float y, float z, float width, float lengt
     vertices.push_back(z);
 
     vertices.insert(vertices.end(), {colorR, colorG, colorB});
+
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
     
     vertices.push_back(x - halfWidth);   // Top left
     vertices.push_back(y + halfLength);
@@ -537,18 +500,26 @@ void Plane::generateVertices(float x, float y, float z, float width, float lengt
 
     vertices.insert(vertices.end(), {colorR, colorG, colorB});
 
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+
     vertices.push_back(x + halfWidth);   // Top right
     vertices.push_back(y + halfLength);
     vertices.push_back(z);
 
     vertices.insert(vertices.end(), {colorR, colorG, colorB});
 
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
 
     vertices.push_back(x + halfWidth);   // Bot Right
     vertices.push_back(y - halfLength);
     vertices.push_back(z);
 
     vertices.insert(vertices.end(), {colorR, colorG, colorB});
+
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
 
     indices.insert(indices.end(), {0, 1, 2, 2, 0, 3});  // Plane
     
@@ -560,7 +531,6 @@ void Plane::draw() {
     glBindVertexArray(VAOc);
     glDrawElements(GL_TRIANGLES, indexSize, GL_UNSIGNED_INT, 0);
 }
-
 
 
 class Sphere
