@@ -22,6 +22,14 @@
         "list": "cpp",
         "format": "cpp",
         "xstring": "cpp",
-        "xlocale": "cpp"
+        "xlocale": "cpp",
+        "cmath": "cpp",
+        "chrono": "cpp",
+        "iterator": "cpp",
+        "xtree": "cpp",
+        "forward_list": "cpp",
+        "xhash": "cpp",
+        "xutility": "cpp",
+        "map": "cpp"
     }
 }

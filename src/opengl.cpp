@@ -16,7 +16,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 // Initialize Camera
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 10.0f); // Camera is 3 units 'above' the scene
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 4.0f); // Camera is 3 units 'above' the scene
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);  // Camera is initially looking at the origin.
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // Camera up is set as the 'y' axis
 
@@ -214,12 +214,18 @@ int main () {
     glm::mat4 ortho = glm::mat4(1.0f);
     ortho = glm::ortho(-5.0f, 5.0f, 5.0f, -5.0f, -30.0f, 10.0f);
 
+    // Initialize light colors
+    glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+    glm::vec3 toyColor(1.0f, 0.5f, 0.31f);
+    glm::vec3 result = lightColor * toyColor; // = (1.0f, 0.5f, 0.31f);
+
     // Load Textures
-    unsigned int planks, iron, wax, woodgrain;
+    unsigned int planks, iron, wax, woodgrain, bricks;
     glGenTextures(1, &planks);
     glGenTextures(1, &iron);
     glGenTextures(1, &wax);
     glGenTextures(1, &woodgrain);
+    glGenTextures(1, &bricks);
    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, planks);
@@ -261,54 +267,78 @@ int main () {
     // load and generate the texture
     loadTexture(".\\resources\\textures\\woodgrain.jpg");
 
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, bricks);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    loadTexture(".\\resources\\textures\\wall.jpg");
+
     // Build and compile shaders
     // uses custom include to make creating new shaders easier.
-    Shader myShader("../shaders/default.vs", "../shaders/default.fs");
-    myShader.use();
+    Shader myShader("../shaders/color.vs", "../shaders/color.fs");
+    Shader lightSourceShader("../shaders/lightSource.vs", "../shaders/lightSource.fs");
+    Shader lightingShader("../shaders/multiLight.vs", "../shaders/multiLight.fs");
     
-
+    glm::vec3 lightPos = glm::vec3(3.0f, -3.0f, 1.0f);
     Cylinder helmet_bottom(1.0f, 1.0f, 0.0f, 1.0f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
-    //Cube cube(0.0f, 0.0f, 0.0f, 4.0f, 5.0f, 4.0f, 255, 0, 0);
     Cone helmet_top(1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
     Plane table(0.0f, 0.0f, 0.0f, 6.0f, 4.0f, 139/255.f, 69/255.f, 19/255.f);
     Cylinder candle_bottom(1.6f, 1.0f, 0.0f, 0.5f, 0.2f, 112/255.f, 124/255.f, 130/255.f, 20);
     Cylinder candle_top(1.6f, 1.0f, 0.5f, 0.05f, 0.15f, 112/255.f, 124/255.f, 130/255.f, 20);
-    //Sphere sphere(0.0f, 0.0f, 0.0f, 4.0f, 255, 0, 0, 20, 20);
+    Cone practiceCone(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 112/255.f, 124/255.f, 130/255.f, 4);
+    Cube lightSourceCube(lightPos.x, lightPos.y, lightPos.z, 0.5f, 0.5f, 0.5f,112/255.f, 124/255.f, 130/255.f);
+    Cube subjectCube(0.0f, 0.0f, 0.0f, 2.0f, 2.0f, 2.0f, 112/255.f, 124/255.f, 130/255.f);
+
     while(!glfwWindowShouldClose(window))
     {
-
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         processInput(window);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 10.f);
+        glClearColor(0.0f, 0.0f, 0.0f, 10.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-
-        myShader.setMatrix4fv("model", model);
-        myShader.setMatrix4fv("view", view);
-        if (usePerspective) {
-            myShader.setMatrix4fv("projection", perspective);
-        } else {
-            myShader.setMatrix4fv("projection", ortho);
-        }
+        // Enable lighting shader
+        lightingShader.use();
         
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        // Set the view position
+        lightingShader.setVec3("viewPos", cameraPos);
 
-        //cube.draw();
-        myShader.setInt("texture1", 1);
-        helmet_top.draw();
-        helmet_bottom.draw();
-        myShader.setInt("texture1", 0);
-        table.draw();
-        myShader.setInt("texture1", 3);
-        candle_bottom.draw();
-        myShader.setInt("texture1", 2);
-        candle_top.draw();
-        //sphere.draw();
-        //myShape.render();
+        // Set directional light properties
+        lightingShader.setVec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+        lightingShader.setVec3("dirLight.diffuse", glm::vec3(0.0f, 1.0f, 0.0f));
+        lightingShader.setVec3("dirLight.specular", glm::vec3(0.0f, 0.3f, 0.0f));
+        lightingShader.setVec3("dirLight.direction", glm::vec3(3.0f, 0.0f, -3.0f));
+
+        // Set point light properties
+        lightingShader.setVec3("pointLights[0].position", glm::vec3(1.0f, 0.0f, 0.5f));
+        lightingShader.setVec3("pointLights[0].ambient", glm::vec3(0.0f, 0.0f, 0.0f));
+        lightingShader.setVec3("pointLights[0].diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
+        lightingShader.setVec3("pointLights[0].specular", glm::vec3(0.0f, 0.0f, 0.0f));
+        lightingShader.setFloat("pointLights[0].constant", 1.0f );
+        lightingShader.setFloat("pointLights[0].linear", 0.7f);
+        lightingShader.setFloat("pointLights[0].quadratic", 1.8f);
+
+        // Set material properties
+        lightingShader.setInt("material.specular", 4);
+        lightingShader.setInt("material.diffuse", 4);
+        lightingShader.setFloat("material.shininess", 64.0f);
+        
+        // Set model, view, and projection for lighting shader
+        lightingShader.setMatrix4fv("model", model);
+        lightingShader.setMatrix4fv("view", view);
+        if (usePerspective) {
+            lightingShader.setMatrix4fv("projection", perspective);
+        } else {
+            lightingShader.setMatrix4fv("projection", ortho);
+        }
+        practiceCone.draw();
         glfwPollEvents();    
         glfwSwapBuffers(window);
     }

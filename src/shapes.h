@@ -72,74 +72,102 @@ void Cylinder::init() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
 
     // Describe where to find the vertex attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0); // position
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float))); // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3* sizeof(float))); // color
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float))); // texture
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6* sizeof(float))); // texture
     glEnableVertexAttribArray(2);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8* sizeof(float))); // normals
+    glEnableVertexAttribArray(3);
 
 }
 void Cylinder::generateVertices(float x, float y, float z, float height, float radius, float colorR, float colorG, float colorB, int numSlices) {
     for(int i=0; i < numSlices; i++) {
         float theta = (((float)i)*2.0*M_PI) / numSlices;
-        float nextTheta = (((float)i+1)*2.0*M_PI) / numSlices;
-
-        vertices.push_back(x);                          // Circle center top - 0
-        vertices.push_back(y);
+        float nextTheta = (((float)i+1.0)*2.0*M_PI) / numSlices;
+        float currX = x + radius*cos(theta);
+        float currY = y + radius*sin(theta);
+        float nextX = x + radius*cos(nextTheta);
+        float nextY = y + radius*sin(nextTheta);
+        glm::vec3 tempVec;
+        vertices.push_back(x);                              // Circle center top - 0
+        vertices.push_back(y);                              // X,Y,Z
         vertices.push_back(height + z);
-        vertices.push_back(colorR);
+        vertices.push_back(colorR);                         // Color
         vertices.push_back(colorG);
         vertices.push_back(colorB);
-        vertices.push_back(0.5f);
+        vertices.push_back(0.5f);                           // Texture Coords
         vertices.push_back(1.0f);
+        vertices.push_back(0);                              // Normals
+        vertices.push_back(0);
+        vertices.push_back(1);
 
-        vertices.push_back(x + radius*cos(theta));          // Outside current top - 1
-        vertices.push_back(y + radius*sin(theta));
+        vertices.push_back(currX);                          // Outside current top - 1
+        vertices.push_back(currY);
         vertices.push_back(height + z);
-        vertices.push_back(colorR);
+        vertices.push_back(colorR);                         // Color
         vertices.push_back(colorG);
         vertices.push_back(colorB);
-        vertices.push_back((1.0f / numSlices) * i);
+        vertices.push_back((1.0f / numSlices) * i);         // Texture Coords
         vertices.push_back(1.0f);
+        tempVec = normalize(glm::vec3(currX, currY, 0.0));
+        vertices.push_back(tempVec.x);                      // Normals
+        vertices.push_back(tempVec.y);
+        vertices.push_back(tempVec.z);
 
-        vertices.push_back(x + radius*cos(nextTheta));      // Outside next top
-        vertices.push_back(y + radius*sin(nextTheta));
+        vertices.push_back(nextX);                          // Outside next top
+        vertices.push_back(nextY);
         vertices.push_back(height + z);
-        vertices.push_back(colorR);
+        vertices.push_back(colorR);                         // Color
         vertices.push_back(colorG);
         vertices.push_back(colorB);
-        vertices.push_back((1.0f / numSlices) * (i + 1));
+        vertices.push_back((1.0f / numSlices) * (i + 1));   // Texture Coords
         vertices.push_back(1.0f);
+        tempVec = normalize(glm::vec3(nextX, nextY, 0.0));
+        vertices.push_back(tempVec.x);                      // Normals
+        vertices.push_back(tempVec.y);
+        vertices.push_back(tempVec.z);
 
-        vertices.push_back(x + radius*cos(nextTheta));      // Outside next bottom
-        vertices.push_back(y + radius*sin(nextTheta));
+        vertices.push_back(nextX);                          // Outside next bottom
+        vertices.push_back(nextY);
         vertices.push_back(z);
-        vertices.push_back(colorR);
+        vertices.push_back(colorR);                         // Colors
         vertices.push_back(colorG);
         vertices.push_back(colorB);
-        vertices.push_back((1.0f / numSlices) * (i + 1));
+        vertices.push_back((1.0f / numSlices) * (i + 1));   // Texture Coords
         vertices.push_back(0.0f);
+        tempVec = normalize(glm::vec3(nextX, nextY, 0.0));
+        vertices.push_back(tempVec.x);                      // Normals
+        vertices.push_back(tempVec.y);
+        vertices.push_back(tempVec.z);
 
 
-        vertices.push_back(x + radius*cos(theta));          // Outside current bottom
-        vertices.push_back(y + radius*sin(theta));
+        vertices.push_back(currX);                          // Outside current bottom
+        vertices.push_back(currY);
         vertices.push_back(z);
-        vertices.push_back(colorR);
+        vertices.push_back(colorR);                         // Color
         vertices.push_back(colorG);
         vertices.push_back(colorB);
-        vertices.push_back((1.0f / numSlices) * (i));
+        vertices.push_back((1.0f / numSlices) * (i));       /// Texture Coords
         vertices.push_back(0.0f);
+        tempVec = normalize(glm::vec3(currX, currY, 0.0));
+        vertices.push_back(tempVec.x);                      // Normals
+        vertices.push_back(tempVec.y);
+        vertices.push_back(tempVec.z);
 
 
-        vertices.push_back(x);                          // Center bottom
+        vertices.push_back(x);                              // Center bottom
         vertices.push_back(y);
         vertices.push_back(z);
-        vertices.push_back(colorR);
+        vertices.push_back(colorR);                         // Color
         vertices.push_back(colorG);
         vertices.push_back(colorB);
-        vertices.push_back(0.5f);
+        vertices.push_back(0.5f);                           // Texture Coords
         vertices.push_back(1.0f);
+        vertices.push_back(0.0f);                           // Normals
+        vertices.push_back(0.0f);
+        vertices.push_back(-1.0f);
 
 
         indices.push_back(0 + i * 6);  // Top Triangle
@@ -222,62 +250,473 @@ void Cube::init() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
 
     // Describe where to find the vertex attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0); // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0); // position
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float))); // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3* sizeof(float))); // color
     glEnableVertexAttribArray(1);
-
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6* sizeof(float))); // texture coords
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8* sizeof(float))); // normals
+    glEnableVertexAttribArray(3);
 }
 void Cube::generateVertices(float x, float y, float z, float width, float length, float height, float colorR, float colorG, float colorB) {
     float halfWidth = width / 2.0;
     float halfLength = length / 2.0;
+
+    // Front - Triangle 1 *********************************************
     vertices.push_back(x - halfWidth);   // Bot left front
     vertices.push_back(y - halfLength);
     vertices.push_back(z);
+    vertices.push_back(colorR);     
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0);
+    vertices.push_back(0);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
 
-    vertices.insert(vertices.end(), {colorR, colorG, colorB});
-    
     vertices.push_back(x + halfWidth);   // Bot right front
     vertices.push_back(y - halfLength);
     vertices.push_back(z);
-
-    vertices.insert(vertices.end(), {colorR, colorG, colorB});
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
 
     vertices.push_back(x + halfWidth);   // Top right front
     vertices.push_back(y - halfLength);
     vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
 
-    vertices.insert(vertices.end(), {colorR, colorG, colorB});
+    // Front - Triangle 2 ***********************************************
+
+    vertices.push_back(x - halfWidth);   // Bot left front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
 
     vertices.push_back(x - halfWidth);   // Top left front
     vertices.push_back(y - halfLength);
     vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
 
-    vertices.insert(vertices.end(), {colorR, colorG, colorB});
+    vertices.push_back(x + halfWidth);   // Top right front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
+
+    // Right Side - Triangle 1 ***********************************************
 
     vertices.push_back(x + halfWidth);   // Bot right right side
     vertices.push_back(y + halfLength);
     vertices.push_back(z);
-
-    vertices.insert(vertices.end(), {colorR, colorG, colorB});
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
 
     vertices.push_back(x + halfWidth);   // Top right right side
     vertices.push_back(y + halfLength);
     vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
 
-    vertices.insert(vertices.end(), {colorR, colorG, colorB});
+    vertices.push_back(x + halfWidth);   // Top right front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    // Right Side - Triangle 2 *************************************************
+
+    vertices.push_back(x + halfWidth);   // Top right front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(x + halfWidth);   // Bot right front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(x + halfWidth);   // Bot right right side
+    vertices.push_back(y + halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    // Back Side - Triangle 1 ***************************************************
+
+    vertices.push_back(x + halfWidth);   // Bot right right side
+    vertices.push_back(y + halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(x + halfWidth);   // Top right right side
+    vertices.push_back(y + halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
 
     vertices.push_back(x - halfWidth);   // Top left top
     vertices.push_back(y + halfLength);
     vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
 
-    vertices.insert(vertices.end(), {colorR, colorG, colorB});
+    // Back Side - Triangle 2 *********************************************************
+
+    vertices.push_back(x - halfWidth);   // Top left top
+    vertices.push_back(y + halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
 
     vertices.push_back(x - halfWidth);   // Top left bottom
     vertices.push_back(y + halfLength);
     vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
 
-    vertices.insert(vertices.end(), {colorR, colorG, colorB});
+    vertices.push_back(x + halfWidth);   // Bot right right side
+    vertices.push_back(y + halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+
+
+    // Left Side - Triangle 1 ***************************************************************
+    vertices.push_back(x - halfWidth);   // Bot left front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(x - halfWidth);   // Top left front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(x - halfWidth);   // Top left top
+    vertices.push_back(y + halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    // Left Side - Triangle 2 ***************************************************************
+    vertices.push_back(x - halfWidth);   // Top left top
+    vertices.push_back(y + halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    
+    vertices.push_back(x - halfWidth);   // Top left bottom
+    vertices.push_back(y + halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    vertices.push_back(x - halfWidth);   // Bot left front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+
+    // Top Side - Triangle 1 ****************************************************************
+    vertices.push_back(x - halfWidth);   // Top left front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+
+    vertices.push_back(x - halfWidth);   // Top left top
+    vertices.push_back(y + halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+
+    vertices.push_back(x + halfWidth);   // Top right right side
+    vertices.push_back(y + halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+
+    // Top Side - Triangle 2 ****************************************************************
+    vertices.push_back(x + halfWidth);   // Top right right side
+    vertices.push_back(y + halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+
+    vertices.push_back(x + halfWidth);   // Top right front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+
+    vertices.push_back(x - halfWidth);   // Top left front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(height + z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+
+
+    // Bottom Side - Triangle 1 *************************************************************
+    vertices.push_back(x - halfWidth);   // Bot left front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+
+    vertices.push_back(x - halfWidth);   // Top left bottom
+    vertices.push_back(y + halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+
+    vertices.push_back(x + halfWidth);   // Bot right right side
+    vertices.push_back(y + halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+
+
+    // Bottom Side - Triangle 2 *************************************************************
+
+    vertices.push_back(x + halfWidth);   // Bot right right side
+    vertices.push_back(y + halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+
+    vertices.push_back(x + halfWidth);   // Bot right front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(1.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+
+    vertices.push_back(x - halfWidth);   // Bot left front
+    vertices.push_back(y - halfLength);
+    vertices.push_back(z);
+    vertices.push_back(colorR);
+    vertices.push_back(colorG);
+    vertices.push_back(colorB);
+    vertices.push_back(0.0f);
+    vertices.push_back(1.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(0.0f);
+    vertices.push_back(-1.0f);
+
+
 
     indices.insert(indices.end(), {0, 1, 2, 0, 2, 3});  // Front face
     indices.insert(indices.end(), {1, 2, 4, 4, 2, 5});  // Right face
@@ -292,7 +731,7 @@ void Cube::generateVertices(float x, float y, float z, float width, float length
 }
 void Cube::draw() {
     glBindVertexArray(VAOc);
-    glDrawElements(GL_TRIANGLES, indexSize, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, vertexSize);
 }
 
 
@@ -351,63 +790,113 @@ void Cone::init() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(int), &indices[0], GL_STATIC_DRAW);
 
     // Describe where to find the vertex attributes
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0); // position
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float))); // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3* sizeof(float))); // color
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float))); // texture
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float))); // texture
     glEnableVertexAttribArray(2);
-
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float))); // normals
+    glEnableVertexAttribArray(3);
 }
 void Cone::generateVertices(float x, float y, float z, float height, float radius, float colorR, float colorG, float colorB, int numSlices) {
+    float coneAngle = atan(radius/height);
     for(int i=0; i < numSlices; i++) {
         float theta = (((float)i)*2.0*M_PI) / numSlices;
         float nextTheta = (((float)i+1)*2.0*M_PI) / numSlices;
-        vertices.push_back(x);                          // Circle center top - 0
+        float currX = x + radius*cos(theta);
+        float currY = y + radius*sin(theta);
+        float nextX = x + radius*cos(nextTheta);
+        float nextY = y + radius*sin(nextTheta);
+        float normalZ = z + radius*sin(coneAngle);
+        glm::vec3 tempVec;
+
+        // Side Triangle *******************************************************************
+        vertices.push_back(x);                                  // Circle center top - 0
         vertices.push_back(y);
         vertices.push_back(height + z);
-        vertices.push_back(colorR);
+        vertices.push_back(colorR);                             // Color
         vertices.push_back(colorG);
         vertices.push_back(colorB);
-
-        vertices.push_back(0.5f);
+        vertices.push_back(0.5f);                               // Texture coords
         vertices.push_back(1.0f);
+        tempVec = glm::normalize(glm::vec3(nextX, nextY, normalZ));
+        vertices.push_back(tempVec.x);                          // Normals
+        vertices.push_back(tempVec.y);
+        vertices.push_back(tempVec.z);
 
-        vertices.push_back(x + radius*cos(nextTheta));      // Outside next bottom
-        vertices.push_back(y + radius*sin(nextTheta));
+
+        vertices.push_back(nextX);                              // Outside next bottom
+        vertices.push_back(nextY);
         vertices.push_back(z);
-        vertices.push_back(colorR);
+        vertices.push_back(colorR);                             // Color
         vertices.push_back(colorG);
         vertices.push_back(colorB);
-
-        vertices.push_back(1.0f);
+        vertices.push_back(1.0f);                               // Texture coords
         vertices.push_back(0.0f);
+        tempVec = glm::normalize(glm::vec3(nextX, nextY, normalZ));
+        vertices.push_back(tempVec.x);                          // Normals
+        vertices.push_back(tempVec.y);
+        vertices.push_back(tempVec.z);
 
-        vertices.push_back(x + radius*cos(theta));          // Outside current bottom
-        vertices.push_back(y + radius*sin(theta));
+    
+        vertices.push_back(currX);                              // Outside current bottom
+        vertices.push_back(currY);
         vertices.push_back(z);
-        vertices.push_back(colorR);
+        vertices.push_back(colorR);                             // Colors
         vertices.push_back(colorG);
         vertices.push_back(colorB);
-
+        vertices.push_back(0.0f);                               // Texture coords
         vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
+        tempVec = glm::normalize(glm::vec3(currX, currY, normalZ));
+        vertices.push_back(tempVec.x);                          // Normals
+        vertices.push_back(tempVec.y);
+        vertices.push_back(tempVec.z);
 
-        vertices.push_back(x);                          // Center bottom
+
+        // Bottom Triangle **********************************************************************
+
+        vertices.push_back(x);                                  // Center bottom
         vertices.push_back(y);
         vertices.push_back(z);
-        vertices.push_back(colorR);
+        vertices.push_back(colorR);                             // Colors
         vertices.push_back(colorG);
         vertices.push_back(colorB);
+        vertices.push_back(0.5f);                               // Texture coords
+        vertices.push_back(0.5f);
+        vertices.push_back(0.0f);                               // Normals
+        vertices.push_back(0.0f);
+        vertices.push_back(-1.0f);
 
-        vertices.push_back(0.5f);
-        vertices.push_back(0.5f);
+        vertices.push_back(nextX);                              // Outside next bottom
+        vertices.push_back(nextY);
+        vertices.push_back(z);
+        vertices.push_back(colorR);                             // Color
+        vertices.push_back(colorG);
+        vertices.push_back(colorB);
+        vertices.push_back(1.0f);                               // Texture coords
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);                               // Normals
+        vertices.push_back(0.0f);
+        vertices.push_back(-1.0f);
+
+        vertices.push_back(currX);                              // Outside current bottom
+        vertices.push_back(currY);
+        vertices.push_back(z);
+        vertices.push_back(colorR);                             // Colors
+        vertices.push_back(colorG);
+        vertices.push_back(colorB);
+        vertices.push_back(0.0f);                               // Texture coords
+        vertices.push_back(0.0f);
+        vertices.push_back(0.0f);                               // Normals
+        vertices.push_back(0.0f);
+        vertices.push_back(-1.0f);
 
         indices.push_back(0 + i * 4);  // Top Triangle
         indices.push_back(1 + i * 4);
         indices.push_back(2 + i * 4);
         
-        indices.push_back(1 + i * 4);  // Side Triangle
+        indices.push_back(1 + i * 4);  // Bottom Triangle
         indices.push_back(3 + i * 4);
         indices.push_back(2 + i * 4);
     }
@@ -416,7 +905,7 @@ void Cone::generateVertices(float x, float y, float z, float height, float radiu
 }
 void Cone::draw() {
     glBindVertexArray(VAOc);
-    glDrawElements(GL_TRIANGLES, indexSize, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, vertexSize);
 }
 
 
