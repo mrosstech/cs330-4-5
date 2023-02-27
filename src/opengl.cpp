@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <cmath>
+#include <time.h>
 #include "shader.h"
 #include "shapes.h"
 
@@ -183,6 +184,8 @@ int main () {
         return -1;
     }    
 
+    // Random seed
+    srand (time(NULL));
 
     // Set texture repetition parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
@@ -220,12 +223,14 @@ int main () {
     glm::vec3 result = lightColor * toyColor; // = (1.0f, 0.5f, 0.31f);
 
     // Load Textures
-    unsigned int planks, iron, wax, woodgrain, bricks;
+    unsigned int planks, iron, wax, woodgrain, bricks, greenglass, book;
     glGenTextures(1, &planks);
     glGenTextures(1, &iron);
     glGenTextures(1, &wax);
     glGenTextures(1, &woodgrain);
     glGenTextures(1, &bricks);
+    glGenTextures(1, &greenglass);
+    glGenTextures(1, &book);
    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, planks);
@@ -276,6 +281,24 @@ int main () {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     loadTexture(".\\resources\\textures\\wall.jpg");
 
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, greenglass);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    loadTexture(".\\resources\\textures\\greenglass.jpg");
+
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, greenglass);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    loadTexture(".\\resources\\textures\\book.jpg");
+
     // Build and compile shaders
     // uses custom include to make creating new shaders easier.
     Shader myShader("../shaders/color.vs", "../shaders/color.fs");
@@ -283,14 +306,36 @@ int main () {
     Shader lightingShader("../shaders/multiLight.vs", "../shaders/multiLight.fs");
     
     glm::vec3 lightPos = glm::vec3(3.0f, -3.0f, 1.0f);
-    Cylinder helmet_bottom(1.0f, 1.0f, 0.0f, 1.0f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
-    Cone helmet_top(1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 112/255.f, 124/255.f, 130/255.f, 20);
-    Plane table(0.0f, 0.0f, 0.0f, 6.0f, 4.0f, 139/255.f, 69/255.f, 19/255.f);
-    Cylinder candle_bottom(1.6f, 1.0f, 0.0f, 0.5f, 0.2f, 112/255.f, 124/255.f, 130/255.f, 20);
-    Cylinder candle_top(1.6f, 1.0f, 0.5f, 0.05f, 0.15f, 112/255.f, 124/255.f, 130/255.f, 20);
+
+    float helmetX, helmetY, helmetRadius;
+    helmetX = -0.5f;
+    helmetY = 0.0f;
+    helmetRadius = 0.5f;
+
+    float candleX, candleY;
+    candleX = 0.5f;
+    candleY = 0.7f;
+
+    float bottleX, bottleY;
+    bottleX = -1.5f;
+    bottleY = 1.0f;
+
+    Plane table(0.0f, 0.0f, 0.0f, 4.0f, 3.0f, 139/255.f, 69/255.f, 19/255.f);
+    Cylinder helmet_bottom(helmetX, helmetY, 0.0f, 1.0f, helmetRadius, 112/255.f, 124/255.f, 130/255.f, 20);
+    Cone helmet_top(helmetX, helmetY, 1.0f, 0.2f, helmetRadius, 112/255.f, 124/255.f, 130/255.f, 20);
+    Cylinder candle_bottom(candleX, candleY, 0.0f, 0.5f, 0.2f, 112/255.f, 124/255.f, 130/255.f, 20);
+    Cylinder candle_top(candleX, candleY, 0.5f, 0.05f, 0.15f, 112/255.f, 124/255.f, 130/255.f, 20);
+    Cylinder bottle_bottom(bottleX, bottleY, 0.0f, 0.7f, 0.2f, 112/255.f, 124/255.f, 130/255.f, 20);
+    Cylinder bottle_top(bottleX, bottleY, 0.7f, 0.3f, 0.1f, 112/255.f, 124/255.f, 130/255.f, 20);
+    Cube book_model(1.0f, -0.5f, 0.0f, 1.0f, 0.7f, 0.2f, 112/255.f, 124/255.f, 130/255.f);
     Cone practiceCone(0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 112/255.f, 124/255.f, 130/255.f, 4);
     Cube lightSourceCube(lightPos.x, lightPos.y, lightPos.z, 0.5f, 0.5f, 0.5f,112/255.f, 124/255.f, 130/255.f);
     Cube subjectCube(0.0f, 0.0f, 0.0f, 2.0f, 2.0f, 2.0f, 112/255.f, 124/255.f, 130/255.f);
+    
+    float candle_linear = 0.35f;
+    float candle_quadratic = 0.44f;
+    int linear_change_max = 15;
+    int quadratic_change_max = 15;
 
     while(!glfwWindowShouldClose(window))
     {
@@ -304,6 +349,12 @@ int main () {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+        // Make candle flicker
+        float flicker_linear_add, flicker_quadratic_add;
+        flicker_linear_add = (float)((rand() % (2 * linear_change_max) - linear_change_max)/100.0);
+        flicker_quadratic_add = (float)((rand() % (2 * quadratic_change_max) - quadratic_change_max)/100.0);
+        
         // Enable lighting shader
         lightingShader.use();
         
@@ -311,25 +362,21 @@ int main () {
         lightingShader.setVec3("viewPos", cameraPos);
 
         // Set directional light properties
-        lightingShader.setVec3("dirLight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
-        lightingShader.setVec3("dirLight.diffuse", glm::vec3(0.0f, 1.0f, 0.0f));
-        lightingShader.setVec3("dirLight.specular", glm::vec3(0.0f, 0.3f, 0.0f));
-        lightingShader.setVec3("dirLight.direction", glm::vec3(3.0f, 0.0f, -3.0f));
+        lightingShader.setVec3("dirLight.ambient", glm::vec3(0.1f, 0.0f, 0.5f)); 
+        lightingShader.setVec3("dirLight.diffuse", glm::vec3(0.1f, 0.0f, 0.5f));  // Create a blue effect
+        lightingShader.setVec3("dirLight.specular", glm::vec3(0.1f, 0.0f, 0.5f));
+        lightingShader.setVec3("dirLight.direction", glm::vec3(3.0f, 0.0f, -3.0f)); // Put the light on the left side
 
         // Set point light properties
-        lightingShader.setVec3("pointLights[0].position", glm::vec3(1.0f, 0.0f, 0.5f));
-        lightingShader.setVec3("pointLights[0].ambient", glm::vec3(0.0f, 0.0f, 0.0f));
-        lightingShader.setVec3("pointLights[0].diffuse", glm::vec3(0.3f, 0.3f, 0.3f));
-        lightingShader.setVec3("pointLights[0].specular", glm::vec3(0.0f, 0.0f, 0.0f));
+        lightingShader.setVec3("pointLights[0].position", glm::vec3(candleX, candleY, 0.75f)); // Place the light on the candle
+        lightingShader.setVec3("pointLights[0].ambient", glm::vec3(251/255.f, 236/255.f, 93/255.f));
+        lightingShader.setVec3("pointLights[0].diffuse", glm::vec3(251/255.f, 236/255.f, 93/255.f));  // Set the color to a warm yellow  rgb(251, 236, 93)
+        lightingShader.setVec3("pointLights[0].specular", glm::vec3(251/255.f, 236/255.f, 93/255.f));
         lightingShader.setFloat("pointLights[0].constant", 1.0f );
-        lightingShader.setFloat("pointLights[0].linear", 0.7f);
-        lightingShader.setFloat("pointLights[0].quadratic", 1.8f);
+        lightingShader.setFloat("pointLights[0].linear", 0.35f + flicker_linear_add);
+        lightingShader.setFloat("pointLights[0].quadratic", 0.44f + flicker_quadratic_add);
 
-        // Set material properties
-        lightingShader.setInt("material.specular", 4);
-        lightingShader.setInt("material.diffuse", 4);
-        lightingShader.setFloat("material.shininess", 64.0f);
-        
+
         // Set model, view, and projection for lighting shader
         lightingShader.setMatrix4fv("model", model);
         lightingShader.setMatrix4fv("view", view);
@@ -338,7 +385,49 @@ int main () {
         } else {
             lightingShader.setMatrix4fv("projection", ortho);
         }
-        practiceCone.draw();
+
+        // Set these for each material to alter the appearance
+        // Helmet
+        // Set material properties
+        lightingShader.setInt("material.specular", 1);
+        lightingShader.setInt("material.diffuse", 1);
+        lightingShader.setFloat("material.shininess", 100.0f);
+        helmet_bottom.draw();
+        helmet_top.draw();
+
+        // Candle
+        // Set material properties
+        lightingShader.setInt("material.specular", 3);
+        lightingShader.setInt("material.diffuse", 3);
+        lightingShader.setFloat("material.shininess", 20.0f);
+        candle_bottom.draw();
+
+        lightingShader.setInt("material.specular", 2);
+        lightingShader.setInt("material.diffuse", 2);
+        candle_top.draw();
+
+        // Bottle
+        // Set material properties
+        lightingShader.setInt("material.specular", 5);
+        lightingShader.setInt("material.diffuse", 5);
+        lightingShader.setFloat("material.shininess", 100.0f);
+        bottle_bottom.draw();
+        bottle_top.draw();
+
+        // Book
+        // Set material properties
+        lightingShader.setInt("material.specular", 6);
+        lightingShader.setInt("material.diffuse", 6);
+        lightingShader.setFloat("material.shininess", 10.0f);
+        book_model.draw();
+
+        // Table
+        // Set material properties
+        lightingShader.setInt("material.specular", 0);
+        lightingShader.setInt("material.diffuse", 0);
+        lightingShader.setFloat("material.shininess", 10.0f);
+        table.draw();
+
         glfwPollEvents();    
         glfwSwapBuffers(window);
     }
